@@ -3,7 +3,7 @@ var cool = require('cool-ascii-faces');
 
 var botID = process.env.BOT_ID;
 var name = process.env.name;
-var help="Usage: \n/"+name+" introduces all commands\nbuild directory will use git to pull and then restart pm2 for the specified directory\nls directory will return the contents of the given directories\ncat file will return the contents of the spcified files\nhelp will display this mneu";
+var help="Usage: \n/"+name+" introduces all commands\nbuild directory will use git to pull for the specified directory\nAdding npm, pm2, or forever will also run those commands\nls directory will return the contents of the given directories\ncat file will return the contents of the spcified files\nstatus will return the servers current motd\nhelp will display this mneu";
 
 function respond() {
     console.log(name);
@@ -32,7 +32,7 @@ function respond() {
 	while(input.indexOf(" ")>=0){
 	    var argT=input.substring(0, input.indexOf(" ")+1);
 	    console.log(argT);
-	    argsL.push(argT);
+	    argsL.push(argT.trim());
 	    input=input.substring(input.indexOf(" ")+1);
 	    console.log(input);
 	}
@@ -50,6 +50,14 @@ function respond() {
 	    else if(com=="cat"){
 		var catOut=new run_cmd([com], [argsL]);
 	    }
+	    else if(com=="status"){
+		var exec=require('child_process').exec;
+		exec('for f in /etc/update-motd.d/*; do bash $f done', function(error, stdout, stderr){
+		    if(error)
+			throw error;
+		    postMessage(stdout);
+		});
+	    }
 	    else if(com=="build"){
 		var exec = require('child_process').exec;
 		console.log(argsL[0]);
@@ -59,30 +67,47 @@ function respond() {
 		    }
 		    postMessage(stdout);
 		});
-		if(argsL[1] && argsL[1]=="node"){
+		if((argsL[1] && argsL[1]=="npm") || (argsL[2] && argsL[2]=="npm") || (argsL[3] && argsL[3]=="npm")){
 		    exec('npm install', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
 			if(error)
 			    console.log(error);
 			postMessage(stdout);
 		    });
 		}
-		exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
-		    console.log("Getting main file");
-		    if(error)
-			throw error;
-		    var spaceLoc=stdout.indexOf(" ", 5);
-		    var endLoc=stdout.indexOf("\"", spaceLoc+2);
-		    console.log(stdout+" "+spaceLoc+" "+endLoc);
-		    var mainfile=stdout.substring(spaceLoc+2, endLoc);
-		    console.log(mainfile);
-		    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		if((argsL[1] && argsL[1]=="pm2") || (argsL[2] && argsL[2]=="pm2") || (argsL[3] && argsL[3]=="pm2")){
+		    exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			console.log("Getting main file");
 			if(error)
 			    throw error;
-			postMessage(stdout);
+			var spaceLoc=stdout.indexOf(" ", 5);
+			var endLoc=stdout.indexOf("\"", spaceLoc+2);
+			console.log(stdout+" "+spaceLoc+" "+endLoc);
+			var mainfile=stdout.substring(spaceLoc+2, endLoc);
+			console.log(mainfile);
+			exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			    if(error)
+				throw error;
+			    postMessage(stdout);
+			});
 		    });
-		});
-		
-		
+		}
+		if((argsL[1] && argsL[1]=="forever") || (argsL[2] && argsL[2]=="forever") || (argsL[3] && argsL[3]=="forever")){
+		    exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			console.log("Getting main file");
+			if(error)
+			    throw error;
+			var spaceLoc=stdout.indexOf(" ", 5);
+			var endLoc=stdout.indexOf("\"", spaceLoc+2);
+			console.log(stdout+" "+spaceLoc+" "+endLoc);
+			var mainfile=stdout.substring(spaceLoc+2, endLoc);
+			console.log(mainfile);
+			exec('forever restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			    if(error)
+				throw error;
+			    postMessage(stdout);
+			});
+		    });
+		}
 	    }
 	    else{
 		console.log("Command not found");
