@@ -52,7 +52,7 @@ function respond() {
 	    }
 	    else if(com=="status"){
 		var exec=require('child_process').exec;
-		exec('for f in /etc/update-motd.d/*; do bash $f done', function(error, stdout, stderr){
+		exec('for f in /etc/update-motd.d/*; do bash $f; done', function(error, stdout, stderr){
 		    if(error)
 			throw error;
 		    postMessage(stdout);
@@ -87,20 +87,11 @@ function respond() {
 			exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			    if(error)
 				throw error;
-			    var spaceLoc=stdout.indexOf(" ", 5);
-			    var endLoc=stdout.indexOf("\"", spaceLoc+2);
-			    console.log(stdout+" "+spaceLoc+" "+endLoc);
-			    var mainfile=stdout.substring(spaceLoc+2, endLoc);
-			    console.log(mainfile);
-			    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
-				if(error)
-				    throw error;
-				postMessage(stdout);
-			    });
+			    postMessage(stdout);
 			});
 		    });	
 		    if((argsL[1] && argsL[1]=="forever") || (argsL[2] && argsL[2]=="forever") || (argsL[3] && argsL[3]=="forever")){
-			exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			exec('grep "main" package.json', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			    console.log("Getting main file");
 			    if(error)
 				throw error;
@@ -109,7 +100,7 @@ function respond() {
 			    console.log(stdout+" "+spaceLoc+" "+endLoc);
 			    var mainfile=stdout.substring(spaceLoc+2, endLoc);
 			    console.log(mainfile);
-			    exec('forever restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			    exec('forever restart '+mainfile, {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 				if(error)
 				    throw error;
 				postMessage(stdout);
