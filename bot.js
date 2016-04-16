@@ -61,21 +61,21 @@ function respond() {
 	    else if(com=="build"){
 		var exec = require('child_process').exec;
 		console.log(argsL[0]);
-		exec('git pull origin master', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		exec('git pull origin master', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 		    if(error){
 			throw error;
 		    }
 		    postMessage(stdout);
 		});
 		if((argsL[1] && argsL[1]=="npm") || (argsL[2] && argsL[2]=="npm") || (argsL[3] && argsL[3]=="npm")){
-		    exec('npm install', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		    exec('npm install', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			if(error)
 			    console.log(error);
 			postMessage(stdout);
 		    });
 		}
 		if((argsL[1] && argsL[1]=="pm2") || (argsL[2] && argsL[2]=="pm2") || (argsL[3] && argsL[3]=="pm2")){
-		    exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		    exec('grep "main" package.json', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			console.log("Getting main file");
 			if(error)
 			    throw error;
@@ -84,34 +84,43 @@ function respond() {
 			console.log(stdout+" "+spaceLoc+" "+endLoc);
 			var mainfile=stdout.substring(spaceLoc+2, endLoc);
 			console.log(mainfile);
-			exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			    if(error)
 				throw error;
-			    postMessage(stdout);
+			    var spaceLoc=stdout.indexOf(" ", 5);
+			    var endLoc=stdout.indexOf("\"", spaceLoc+2);
+			    console.log(stdout+" "+spaceLoc+" "+endLoc);
+			    var mainfile=stdout.substring(spaceLoc+2, endLoc);
+			    console.log(mainfile);
+			    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+				if(error)
+				    throw error;
+				postMessage(stdout);
+			    });
 			});
-		    });
-		}
-		if((argsL[1] && argsL[1]=="forever") || (argsL[2] && argsL[2]=="forever") || (argsL[3] && argsL[3]=="forever")){
-		    exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
-			console.log("Getting main file");
-			if(error)
-			    throw error;
-			var spaceLoc=stdout.indexOf(" ", 5);
-			var endLoc=stdout.indexOf("\"", spaceLoc+2);
-			console.log(stdout+" "+spaceLoc+" "+endLoc);
-			var mainfile=stdout.substring(spaceLoc+2, endLoc);
-			console.log(mainfile);
-			exec('forever restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		    });	
+		    if((argsL[1] && argsL[1]=="forever") || (argsL[2] && argsL[2]=="forever") || (argsL[3] && argsL[3]=="forever")){
+			exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			    console.log("Getting main file");
 			    if(error)
 				throw error;
-			    postMessage(stdout);
+			    var spaceLoc=stdout.indexOf(" ", 5);
+			    var endLoc=stdout.indexOf("\"", spaceLoc+2);
+			    console.log(stdout+" "+spaceLoc+" "+endLoc);
+			    var mainfile=stdout.substring(spaceLoc+2, endLoc);
+			    console.log(mainfile);
+			    exec('forever restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+				if(error)
+				    throw error;
+				postMessage(stdout);
+			    });
 			});
-		    });
+		    }
 		}
-	    }
-	    else{
-		console.log("Command not found");
-		postMessage(help);
+		else{
+		    console.log("Command not found");
+		    postMessage(help);
+		}
 	    }
 	}
 	catch(err){
