@@ -12,6 +12,13 @@ function respond() {
     //console.log(request.text);
     //console.log(request.sender_id);
     var botRgx=new RegExp("^^/"+name);
+    var meRgx=new RegExp("@[jJ]amie");
+    var genRgx=new RegExp("[hH]e+y [eEyYFf]");
+    var usersPlus=["13588762", "31012655", "31012676", "29298633", "20007549"];
+    if(usersPlus.indexOf(request.sender_id)>=0 || (meRgx.test(request.text) || genRgx.test(request.text))){
+	postMessage("Important message in Fami11y from "+request.name+": "+request.text);
+	console.log("Important message");
+    }
     //if message matches bots command string parse it
     if(request.text && botRgx.test(request.text)){
 	console.log("Checking query");
