@@ -52,14 +52,21 @@ function respond() {
 	    }
 	    else if(com=="build"){
 		var exec = require('child_process').exec;
-		exec('git status', {cwd: argsL[0]}, (error, stdout, stderr) => {
+		console.log(argsL[0]);
+		exec('git pull origin master', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
 		    if(error){
 			throw error;
 		    }
 		    postMessage(stdout);
 		});
-		console.log("Hello");
-		exec('grep "main" package.json', {cwd: argsL[0]}, (error, stdout, stderr) => {
+		if(argsL[1] && argsL[1]=="node"){
+		    exec('npm install', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+			if(error)
+			    console.log(error);
+			postMessage(stdout);
+		    });
+		}
+		exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
 		    console.log("Getting main file");
 		    if(error)
 			throw error;
@@ -68,7 +75,7 @@ function respond() {
 		    console.log(stdout+" "+spaceLoc+" "+endLoc);
 		    var mainfile=stdout.substring(spaceLoc+2, endLoc);
 		    console.log(mainfile);
-		    exec('pm2 restart '+mainfile, {cwd: argsL[0]}, (error, stdout, stderr) => {
+		    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
 			if(error)
 			    throw error;
 			postMessage(stdout);
