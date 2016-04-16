@@ -53,20 +53,20 @@ function respond() {
 	    else if(com=="build"){
 		var exec = require('child_process').exec;
 		console.log(argsL[0]);
-		exec('git pull origin master', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		exec('git pull origin master', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 		    if(error){
 			throw error;
 		    }
 		    postMessage(stdout);
 		});
 		if(argsL[1] && argsL[1]=="node"){
-		    exec('npm install', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		    exec('npm install', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			if(error)
 			    console.log(error);
 			postMessage(stdout);
 		    });
 		}
-		exec('grep "main" package.json', {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		exec('grep "main" package.json', {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 		    console.log("Getting main file");
 		    if(error)
 			throw error;
@@ -75,7 +75,7 @@ function respond() {
 		    console.log(stdout+" "+spaceLoc+" "+endLoc);
 		    var mainfile=stdout.substring(spaceLoc+2, endLoc);
 		    console.log(mainfile);
-		    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, (error, stdout, stderr) => {
+		    exec('pm2 restart '+mainfile, {cwd: argsL[0].trim()}, function(error, stdout, stderr){
 			if(error)
 			    throw error;
 			postMessage(stdout);
