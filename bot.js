@@ -13,9 +13,10 @@ function respond() {
     //console.log(request.sender_id);
     var botRgx=new RegExp("^^/"+name);
     var meRgx=new RegExp("[jJ]a[im][mi]e");
-    var genRgx=new RegExp("[hH]e+y [eEyYFf]");
+    var genRgx=new RegExp("[hH]+e+y+,? [eEyYFfaA]");
+    var doesRgx=new RegExp("^[Dd]oe?s? [aA]?");
     var usersPlus=["13588762", "31012655", "31012676", "29298633", "20007549"];
-    if(request.group_id!=21326108 && (usersPlus.indexOf(request.sender_id)>=0 || (meRgx.test(request.text) || genRgx.test(request.text)))){
+    if(request.group_id!=21326108 && (usersPlus.indexOf(request.sender_id)>=0 || (meRgx.test(request.text) || genRgx.test(request.text) || doesRgx.test(request.text)))){
 	postMessage("Important message in Fami11y from "+request.name+": "+request.text);
 	console.log("Important message");
     }
